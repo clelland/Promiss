@@ -1,0 +1,73 @@
+<!doctype html>
+<script src=promiss.js></script>
+<body>
+<h1>Loaded</h1>
+<script>
+  a = new Promiss((resolve, reject) => {
+    console.log("in the promiss constructor");
+    setTimeout(() => {resolve(1)}, 10);
+  }).then(val => { console.log("a"); assert_eq(val, 1); });
+
+  b = new Promiss((resolve, reject) => {
+    console.log("in the promiss constructor");
+    setTimeout(() => {reject(3)}, 10);
+  }).then(val => { notreached(); },
+          val => { console.log("b"); assert_eq(val, 3); });
+
+  c = new Promiss((resolve, reject) => {
+    console.log("in the promiss constructor");
+    setTimeout(() => {reject(4)}, 10);
+  }).catch(val => { console.log("c"); assert_eq(val, 4); });
+
+  d = new Promiss((resolve, reject) => {
+    console.log("in the promiss constructor");
+    setTimeout(() => {reject(5)}, 10);
+  }).then(val => { notreached(); },val => { console.log("d"); assert_eq(val, 5); });
+
+  e = new Promiss((resolve, reject) => {
+    console.log("in the promiss constructor");
+    setTimeout(() => {reject(5)}, 10);
+  }).then(val => { notreached(); }).catch(val => { console.log("e"); assert_eq(val, 5); });
+
+  f = new Promiss((resolve, reject) => {
+    console.log("in the promiss constructor");
+    setTimeout(() => {resolve(6)}, 10);
+  }).then(val => { console.log("f"); assert_eq(val, 6); }).catch(val => { notreached(); });
+
+  g = new Promiss((resolve, reject) => {
+    setTimeout(() => {resolve(-4)}, 50);
+  });
+  g.catch(err => { console.log("It's an error! "+ err); return err;}).then(val=>{console.log("It's not an error? " + val);},err=>{console.log("It's still an error! " + err);});
+  h = g.then(val => {
+    return new Promiss((resolve, reject) => {
+      console.log("h's promise constructor says " + val);
+      setTimeout(() => {
+        if (val % 2 == 0) { resolve(val); }
+        reject(val);
+      });
+    }).then(val => {
+      console.log("chained resolved with " + val);
+      return val;
+    }, err => {
+      console.log("chained rejected with " + err);
+      return err;
+    });
+  });
+  i = g.then(val => {
+    console.log("i' says " + val);
+    return val + 1;
+  }).then(val => {
+    console.log("i says " + val);
+    return val + 1;
+  });
+  j = h.then(val => {
+    console.log("j says " + val);
+  });
+  i.catch(err => { console.log("It's an error in i! " + err);});
+  j.catch(err => { console.log("It's an error in j! " + err);});
+ 
+  k = new Promiss((resolve, reject) => {
+    console.log("in the promiss constructor");
+    resolve(7);
+  }).then(val => { console.log("k"); assert_eq(val, 7); }).catch(val => { notreached(); });
+</script>
